@@ -139,8 +139,7 @@ cask "beszelbar" do
   version "${VERSION}"
   sha256 "${SHA256}"
 
-  url "${RELEASE_URL}",
-      verified: "github.com/Loriage/BeszelBar/"
+  url "${RELEASE_URL}"
   name "BeszelBar"
   desc "Monitor Beszel hubs from the macOS menu bar"
   homepage "https://github.com/Loriage/BeszelBar"
