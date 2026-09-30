@@ -96,10 +96,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 @MainActor
 enum MenuBarStatsFormatter {
-    private static let barLevels = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-
     private struct Metric {
-        let label: String
+        let icon: String
         let value: Double
         let text: String
         let warning: Double
@@ -120,16 +118,16 @@ enum MenuBarStatsFormatter {
 
         var metrics: [Metric] = []
         if settings.showCPU, let cpu = system.cpuPercentage {
-            metrics.append(Metric(label: "CPU", value: cpu, text: "\(Int(cpu))%", warning: 70, critical: 90))
+            metrics.append(Metric(icon: "cpu", value: cpu, text: "\(Int(cpu))%", warning: 70, critical: 90))
         }
         if settings.showMemory, let mem = system.memoryPercentage {
-            metrics.append(Metric(label: "MEM", value: mem, text: "\(Int(mem))%", warning: 70, critical: 90))
+            metrics.append(Metric(icon: "memorychip", value: mem, text: "\(Int(mem))%", warning: 70, critical: 90))
         }
         if settings.showDisk, let disk = system.diskPercentage {
-            metrics.append(Metric(label: "DSK", value: disk, text: "\(Int(disk))%", warning: 70, critical: 90))
+            metrics.append(Metric(icon: "internaldrive", value: disk, text: "\(Int(disk))%", warning: 70, critical: 90))
         }
         if settings.showTemperature, let temp = system.temperature {
-            metrics.append(Metric(label: "TMP", value: temp, text: String(format: "%.0f°C", temp), warning: 60, critical: 80))
+            metrics.append(Metric(icon: "thermometer.medium", value: temp, text: String(format: "%.0f°C", temp), warning: 60, critical: 80))
         }
 
         guard !metrics.isEmpty else { return nil }
@@ -144,24 +142,27 @@ enum MenuBarStatsFormatter {
                 valueAttributes[.foregroundColor] = color
             }
 
-            switch settings.style {
-            case .text:
-                result.append(NSAttributedString(string: "\(metric.label) ", attributes: plain))
-                result.append(NSAttributedString(string: metric.text, attributes: valueAttributes))
-            case .bars:
-                result.append(NSAttributedString(string: String(metric.label.prefix(1)), attributes: plain))
-                result.append(NSAttributedString(string: bar(for: metric.value), attributes: valueAttributes))
-            }
+            result.append(icon(metric.icon, font: digitsFont))
+            result.append(NSAttributedString(string: " \(metric.text)", attributes: valueAttributes))
         }
 
         return result
     }
 
-    /// Temperatures are drawn on a 0–100 °C scale, like percentages.
-    private static func bar(for value: Double) -> String {
-        let clamped = min(max(value, 0), 100)
-        let index = min(Int(clamped / 100 * Double(barLevels.count)), barLevels.count - 1)
-        return barLevels[index]
+    /// An SF Symbol sized to the menu bar font and vertically centered on the text.
+    private static func icon(_ name: String, font: NSFont) -> NSAttributedString {
+        let configuration = NSImage.SymbolConfiguration(pointSize: font.pointSize - 1, weight: .regular)
+            .applying(NSImage.SymbolConfiguration(paletteColors: [.labelColor]))
+        guard let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
+            .withSymbolConfiguration(configuration) else {
+            return NSAttributedString()
+        }
+
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        let y = ((font.capHeight - image.size.height) / 2).rounded()
+        attachment.bounds = CGRect(x: 0, y: y, width: image.size.width, height: image.size.height)
+        return NSAttributedString(attachment: attachment)
     }
 
     private static func thresholdColor(for metric: Metric) -> NSColor? {

@@ -214,18 +214,6 @@ struct AuthResponse: Codable {
     let token: String
 }
 
-enum MenuBarStatsStyle: String, CaseIterable {
-    case text
-    case bars
-
-    var title: String {
-        switch self {
-        case .text: return "Text"
-        case .bars: return "Bars"
-        }
-    }
-}
-
 /// Settings for showing a pinned system's stats next to the menu bar icon.
 /// Stored in UserDefaults so they can be bound with @AppStorage in Settings.
 struct MenuBarStatsSettings {
@@ -234,7 +222,6 @@ struct MenuBarStatsSettings {
     static let showMemoryKey = "menuBarStatsShowMemory"
     static let showDiskKey = "menuBarStatsShowDisk"
     static let showTemperatureKey = "menuBarStatsShowTemperature"
-    static let styleKey = "menuBarStatsStyle"
     static let colorThresholdsKey = "menuBarStatsColorThresholds"
 
     let hubID: UUID
@@ -243,7 +230,6 @@ struct MenuBarStatsSettings {
     let showMemory: Bool
     let showDisk: Bool
     let showTemperature: Bool
-    let style: MenuBarStatsStyle
     let colorThresholds: Bool
 
     /// The value stored under `systemKey`, identifying a system on a specific hub.
@@ -265,7 +251,6 @@ struct MenuBarStatsSettings {
             showMemory: defaults.object(forKey: showMemoryKey) as? Bool ?? true,
             showDisk: defaults.object(forKey: showDiskKey) as? Bool ?? false,
             showTemperature: defaults.object(forKey: showTemperatureKey) as? Bool ?? false,
-            style: defaults.string(forKey: styleKey).flatMap(MenuBarStatsStyle.init(rawValue:)) ?? .text,
             colorThresholds: defaults.object(forKey: colorThresholdsKey) as? Bool ?? true
         )
     }

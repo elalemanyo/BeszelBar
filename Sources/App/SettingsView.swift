@@ -537,7 +537,6 @@ struct MenuBarStatsSettingsView: View {
     @AppStorage(MenuBarStatsSettings.showMemoryKey) private var showMemory = true
     @AppStorage(MenuBarStatsSettings.showDiskKey) private var showDisk = false
     @AppStorage(MenuBarStatsSettings.showTemperatureKey) private var showTemperature = false
-    @AppStorage(MenuBarStatsSettings.styleKey) private var style: MenuBarStatsStyle = .text
     @AppStorage(MenuBarStatsSettings.colorThresholdsKey) private var colorThresholds = true
 
     @State private var hubSystems: [(hub: Instance, systems: [SystemRecord])] = []
@@ -584,19 +583,6 @@ struct MenuBarStatsSettingsView: View {
                     Toggle("Temperature", isOn: $showTemperature)
                 }
                 .toggleStyle(.checkbox)
-
-                HStack {
-                    Text("Style")
-                    Spacer()
-                    Picker("", selection: $style) {
-                        ForEach(MenuBarStatsStyle.allCases, id: \.self) { style in
-                            Text(style.title).tag(style)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .frame(width: 140)
-                }
 
                 Toggle("Color values in orange/red when they get high", isOn: $colorThresholds)
             }
