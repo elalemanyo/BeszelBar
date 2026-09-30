@@ -71,23 +71,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let appState = AppState.shared
 
         let alertCount = appState.activeAlerts.count
-        let symbolName = alertCount > 0 ? "server.rack.fill" : "server.rack"
-        button.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "BeszelBar")
-        button.image?.size = NSSize(width: 18, height: 18)
-
         let font = NSFont.menuBarFont(ofSize: 0)
         let plain: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.labelColor]
-        let title = NSMutableAttributedString()
 
-        if alertCount > 0 {
-            title.append(NSAttributedString(string: " \(alertCount)", attributes: plain))
+        let settings = MenuBarStatsSettings.current()
+        var stats: NSAttributedString?
+        if let settings, let system = appState.menuBarSystem {
+            stats = MenuBarStatsFormatter.attributedString(for: system, settings: settings, font: font)
         }
 
-        if let settings = MenuBarStatsSettings.current(),
-           let system = appState.menuBarSystem,
-           let stats = MenuBarStatsFormatter.attributedString(for: system, settings: settings, font: font) {
-            title.append(NSAttributedString(string: alertCount > 0 ? " · " : " ", attributes: plain))
-            title.append(stats)
+        // Only hide the icon while stats are visible, so the item never becomes empty.
+        let hideIcon = stats != nil && settings?.hideIcon == true
+
+        if hideIcon {
+            button.image = nil
+        } else {
+            let symbolName = alertCount > 0 ? "server.rack.fill" : "server.rack"
+            button.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "BeszelBar")
+            button.image?.size = NSSize(width: 18, height: 18)
+        }
+
+        var parts: [NSAttributedString] = []
+        if alertCount > 0 {
+            let alert = NSMutableAttributedString()
+            if hideIcon {
+                // Without the filled icon, mark the alert count explicitly.
+                alert.append(MenuBarStatsFormatter.icon("exclamationmark.triangle.fill", font: font))
+                alert.append(NSAttributedString(string: " ", attributes: plain))
+            }
+            alert.append(NSAttributedString(string: "\(alertCount)", attributes: plain))
+            parts.append(alert)
+        }
+        if let stats {
+            parts.append(stats)
+        }
+
+        let title = NSMutableAttributedString()
+        for (index, part) in parts.enumerated() {
+            if index > 0 {
+                title.append(NSAttributedString(string: " · ", attributes: plain))
+            } else if !hideIcon {
+                title.append(NSAttributedString(string: " ", attributes: plain))
+            }
+            title.append(part)
         }
 
         button.attributedTitle = title
@@ -150,7 +176,7 @@ enum MenuBarStatsFormatter {
     }
 
     /// An SF Symbol sized to the menu bar font and vertically centered on the text.
-    private static func icon(_ name: String, font: NSFont) -> NSAttributedString {
+    static func icon(_ name: String, font: NSFont) -> NSAttributedString {
         let configuration = NSImage.SymbolConfiguration(pointSize: font.pointSize - 1, weight: .regular)
             .applying(NSImage.SymbolConfiguration(paletteColors: [.labelColor]))
         guard let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?

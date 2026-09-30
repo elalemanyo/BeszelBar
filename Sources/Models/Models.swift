@@ -223,6 +223,7 @@ struct MenuBarStatsSettings {
     static let showDiskKey = "menuBarStatsShowDisk"
     static let showTemperatureKey = "menuBarStatsShowTemperature"
     static let colorThresholdsKey = "menuBarStatsColorThresholds"
+    static let hideIconKey = "menuBarStatsHideIcon"
 
     let hubID: UUID
     let systemID: String
@@ -231,6 +232,7 @@ struct MenuBarStatsSettings {
     let showDisk: Bool
     let showTemperature: Bool
     let colorThresholds: Bool
+    let hideIcon: Bool
 
     /// The value stored under `systemKey`, identifying a system on a specific hub.
     static func pinValue(hubID: UUID, systemID: String) -> String {
@@ -251,7 +253,8 @@ struct MenuBarStatsSettings {
             showMemory: defaults.object(forKey: showMemoryKey) as? Bool ?? true,
             showDisk: defaults.object(forKey: showDiskKey) as? Bool ?? false,
             showTemperature: defaults.object(forKey: showTemperatureKey) as? Bool ?? false,
-            colorThresholds: defaults.object(forKey: colorThresholdsKey) as? Bool ?? true
+            colorThresholds: defaults.object(forKey: colorThresholdsKey) as? Bool ?? true,
+            hideIcon: defaults.object(forKey: hideIconKey) as? Bool ?? false
         )
     }
 }

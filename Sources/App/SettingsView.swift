@@ -538,6 +538,7 @@ struct MenuBarStatsSettingsView: View {
     @AppStorage(MenuBarStatsSettings.showDiskKey) private var showDisk = false
     @AppStorage(MenuBarStatsSettings.showTemperatureKey) private var showTemperature = false
     @AppStorage(MenuBarStatsSettings.colorThresholdsKey) private var colorThresholds = true
+    @AppStorage(MenuBarStatsSettings.hideIconKey) private var hideIcon = false
 
     @State private var hubSystems: [(hub: Instance, systems: [SystemRecord])] = []
     @State private var isLoadingSystems = true
@@ -585,6 +586,7 @@ struct MenuBarStatsSettingsView: View {
                 .toggleStyle(.checkbox)
 
                 Toggle("Color values in orange/red when they get high", isOn: $colorThresholds)
+                Toggle("Hide app icon while stats are shown", isOn: $hideIcon)
             }
 
             Text("Show live stats from one system next to the menu bar icon.")
